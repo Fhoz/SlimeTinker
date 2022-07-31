@@ -7,6 +7,7 @@ import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.Default;
 import co.aikar.commands.annotation.Description;
 import co.aikar.commands.annotation.Subcommand;
+import io.github.sefiraat.slimetinker.SlimeTinker;
 import io.github.sefiraat.slimetinker.items.Guide;
 import io.github.sefiraat.slimetinker.items.templates.ArmourDefinition;
 import io.github.sefiraat.slimetinker.items.templates.ToolDefinition;
@@ -14,9 +15,12 @@ import io.github.sefiraat.slimetinker.utils.Experience;
 import io.github.sefiraat.slimetinker.utils.Ids;
 import io.github.sefiraat.slimetinker.utils.ItemUtils;
 import io.github.sefiraat.slimetinker.utils.ThemeUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.logging.Level;
 
 @CommandAlias("SlimeTinker|st|tinker")
 public class Commands extends BaseCommand {
@@ -62,6 +66,19 @@ public class Commands extends BaseCommand {
             }
         }
 
+        @Subcommand("ArmourWithPlayer")
+        @CommandCompletion("@ITEM_CLASS_ARMOUR @PART_MATERIALS_PLATE @PART_MATERIALS_GAMBESON @PART_MATERIALS_LINKS")
+        @Description("Creates a new SlimeTinker armour piece with the given materials")
+        public void armourWithPlayer(CommandSender sender, String type, String plateMat, String gambesonMat, String linksMat, String playerName) {
+            Player p = Bukkit.getPlayer(playerName);
+            if (p == null) {
+                SlimeTinker.getInstance().getLogger().log(Level.SEVERE, "Failed to give player armour");
+                return;
+            }
+            ArmourDefinition armour = new ArmourDefinition(Ids.PLATE, type, plateMat, gambesonMat, linksMat);
+            p.getInventory().addItem(Guide.HELM.getStack(armour));
+        }
+
         @Subcommand("Tool")
         @CommandCompletion("@ITEM_CLASS_TOOL @PART_MATERIALS_HEAD @PART_MATERIALS_BINDER @PART_MATERIALS_ROD")
         @Description("Creates a new SlimeTinker tool with the given materials")
@@ -76,6 +93,23 @@ public class Commands extends BaseCommand {
                 }
             } else {
                 sender.sendMessage(ThemeUtils.ERROR + "This can only be done as a player.");
+            }
+        }
+
+        @Subcommand("ToolWithPlayer")
+        @CommandCompletion("@ITEM_CLASS_TOOL @PART_MATERIALS_HEAD @PART_MATERIALS_BINDER @PART_MATERIALS_ROD")
+        @Description("Creates a new SlimeTinker tool with the given materials")
+        public void toolWithPlayer(CommandSender sender, String type, String headMat, String binderMat, String rodMat, String playerName) {
+            Player p = Bukkit.getPlayer(playerName);
+            if (p == null) {
+                SlimeTinker.getInstance().getLogger().log(Level.SEVERE, "Failed to give tool to player");
+                return;
+            }
+            ToolDefinition tool = new ToolDefinition(Ids.HEAD, type, headMat, binderMat, rodMat);
+            if (ItemUtils.isToolExplosive(headMat, rodMat)) {
+                p.getInventory().addItem(Guide.EXP_SHOVEL.getStack(tool));
+            } else {
+                p.getInventory().addItem(Guide.SHOVEL.getStack(tool));
             }
         }
 

@@ -97,6 +97,9 @@ public class PlayerDamagedListener implements Listener {
 
     private void modCheckDiamond(@Nonnull EntityDamageByEntityEvent event, int level) {
         if (event.getDamager() instanceof LivingEntity) {
+            if (event.getEntity() instanceof Player) {
+                return;
+            }
             LivingEntity l = (LivingEntity) event.getDamager();
             int rnd = ThreadLocalRandom.current().nextInt(1, 11);
             if (rnd <= (level)) {
